@@ -58,3 +58,90 @@ document.getElementById("newQuote").addEventListener("click", showRandomQuote);
 // Initialize
 showRandomQuote();
 createAddQuoteForm();
+
+
+
+// =====================
+// SECOND JS CODE ADDED HERE 👇
+// (Local Storage + Import/Export Features)
+// =====================
+
+// ✅ Load quotes from localStorage if available
+function loadQuotes() {
+  const storedQuotes = localStorage.getItem("quotes");
+  if (storedQuotes) {
+    quotes = JSON.parse(storedQuotes);
+  }
+}
+
+// ✅ Save quotes to localStorage
+function saveQuotes() {
+  localStorage.setItem("quotes", JSON.stringify(quotes));
+}
+
+// ✅ Restore last viewed quote from sessionStorage
+function restoreLastQuote() {
+  const lastQuote = sessionStorage.getItem("lastQuote");
+  if (lastQuote) {
+    const parsedQuote = JSON.parse(lastQuote);
+    document.getElementById("quoteDisplay").innerHTML = `${parsedQuote.text} — [${parsedQuote.category}]`;
+  }
+}
+
+// ✅ Export quotes to JSON file
+function exportToJsonFile() {
+  const dataStr = JSON.stringify(quotes, null, 2);
+  const blob = new Blob([dataStr], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "quotes.json";
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+// ✅ Import quotes from a JSON file
+function importFromJsonFile(event) {
+  const fileReader = new FileReader();
+  fileReader.onload = function(e) {
+    try {
+      const importedQuotes = JSON.parse(e.target.result);
+      if (Array.isArray(importedQuotes)) {
+        quotes.push(...importedQuotes);
+        saveQuotes();
+        alert("Quotes imported successfully!");
+      } else {
+        alert("Invalid JSON format!");
+      }
+    } catch (error) {
+      alert("Error reading JSON file!");
+    }
+  };
+  fileReader.readAsText(event.target.files[0]);
+}
+
+// ✅ Create buttons for import/export
+function createImportExportButtons() {
+  const container = document.createElement("div");
+
+  const exportBtn = document.createElement("button");
+  exportBtn.textContent = "Export Quotes (JSON)";
+  exportBtn.addEventListener("click", exportToJsonFile);
+
+  const importInput = document.createElement("input");
+  importInput.type = "file";
+  importInput.accept = ".json";
+  importInput.addEventListener("change", importFromJsonFile);
+
+  container.appendChild(exportBtn);
+  container.appendChild(importInput);
+
+  document.body.appendChild(container);
+}
+
+// ✅ Initialize storage-related functions
+loadQuotes();
+createImportExportButtons();
+restoreLastQuote();
